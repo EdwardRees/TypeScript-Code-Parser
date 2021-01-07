@@ -123,9 +123,9 @@ const getKeys = (str: string, comment: string): string[] => {
  */
 const getCodeSnippet = (str: string, comment: string, key: string): string => {
   const start: any = str.match(
-    new RegExp(`${comment}\\s*start\\s*:\\s*${key}`)
+    new RegExp(`[^\\S\\r\\n]*${comment}\\s*start\\s*:\\s*${key}`)
   );
-  const end: any = str.match(new RegExp(`${comment}\\s*end\\s*:\\s*${key}`));
+  const end: any = str.match(new RegExp(`[^\\S\\r\\n]*${comment}\\s*end\\s*:\\s*${key}`));
   if (start === null || end === null) {
     return `No snippet found! May be an issue at ${key}`;
   }
@@ -134,16 +134,16 @@ const getCodeSnippet = (str: string, comment: string, key: string): string => {
     .trim();
   // ignore the start, end comments in the nested slice
   let startComment: any = strSlice.match(
-    new RegExp(`${comment}\\s*start\\s*:.*\\n`)
+    new RegExp(`[^\\S\\r\\n]*${comment}\\s*start\\s*:.*\\n`)
   );
   let endComment: any = strSlice.match(
-    new RegExp(`${comment}\\s*end\\s*:.*\\n`)
+    new RegExp(`[^\\S\\r\\n]*${comment}\\s*end\\s*:.*\\n`)
   );
   while (startComment !== null && endComment !== null) {
     strSlice = strSlice.replace(startComment[0], "");
     strSlice = strSlice.replace(endComment[0], "");
-    startComment = strSlice.match(new RegExp(`${comment}\\s*start\\s*:.*\\n`));
-    endComment = strSlice.match(new RegExp(`${comment}\\s*end\\s*:.*\\n`));
+    startComment = strSlice.match(new RegExp(`[^\\S\\r\\n]*${comment}\\s*start\\s*:.*\\n`));
+    endComment = strSlice.match(new RegExp(`[^\\S\\r\\n]*${comment}\\s*end\\s*:.*\\n`));
   }
   return strSlice;
 };
@@ -235,6 +235,6 @@ const test = () => {
   console.info(code);
 };
 
-test();
+// test();
 
-// export { buildComments, readCode, readCodeHtmlRest, readCodeRest };
+export { buildComments, readCode, readCodeHtmlRest, readCodeRest };
