@@ -1,0 +1,46 @@
+[
+  {
+    "language": "c",
+    "comment": "//"
+  },
+  {
+    "language": "cpp",
+    "comment": "//"
+  },
+  {
+    "language": "cs",
+    "comment": "//"
+  },
+  {
+    "language": "ts",
+    "comment": "//"
+  },
+  {
+    "language": "js",
+    "comment": "//"
+  },
+  {
+    "language": "swift",
+    "comment": "//"
+  },
+  {
+    "language": "kt",
+    "comment": "//"
+  },
+  {
+    "language": "java",
+    "comment": "//"
+  },
+  {
+    "language": "py",
+    "comment": "#"
+  },
+  {
+    "language": "rb",
+    "comment": "#"
+  },
+  {
+    "language": "asm",
+    "comment": ";"
+  }
+]
