@@ -27,7 +27,7 @@ const toHTML = (str: string): string => {
   str = str.replace(/(?:>)/g, "&gt;");
   str = str.replace(/(?:\r\n|\r|\n)/g, "<br>");
   str = str.replace(/\s/g, "&nbsp;");
-  str = str.replace(/(?:\t)/g, "&nbsp;&nbsp;&nbsp;&nbsp;");
+  str = str.replace(/(?:\t)/g, "&nbsp;&nbsp;");
   return str;
 };
 
