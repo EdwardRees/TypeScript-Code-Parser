@@ -1,7 +1,6 @@
 import fs from "fs";
 import path from "path";
 
-
 /**
  * Convert a map into a JS object
  * @param map map to convert
@@ -15,7 +14,6 @@ const mapToObject = (map: Map<string, any>): Object => {
 
   return obj;
 };
-
 
 /**
  * Convert a string to an HTML string
@@ -125,7 +123,9 @@ const getCodeSnippet = (str: string, comment: string, key: string): string => {
   const start: any = str.match(
     new RegExp(`[^\\S\\r\\n]*${comment}\\s*start\\s*:\\s*${key}`)
   );
-  const end: any = str.match(new RegExp(`[^\\S\\r\\n]*${comment}\\s*end\\s*:\\s*${key}`));
+  const end: any = str.match(
+    new RegExp(`[^\\S\\r\\n]*${comment}\\s*end\\s*:\\s*${key}`)
+  );
   if (start === null || end === null) {
     return `No snippet found! May be an issue at ${key}`;
   }
@@ -142,8 +142,12 @@ const getCodeSnippet = (str: string, comment: string, key: string): string => {
   while (startComment !== null && endComment !== null) {
     strSlice = strSlice.replace(startComment[0], "");
     strSlice = strSlice.replace(endComment[0], "");
-    startComment = strSlice.match(new RegExp(`[^\\S\\r\\n]*${comment}\\s*start\\s*:.*\\n`));
-    endComment = strSlice.match(new RegExp(`[^\\S\\r\\n]*${comment}\\s*end\\s*:.*\\n`));
+    startComment = strSlice.match(
+      new RegExp(`[^\\S\\r\\n]*${comment}\\s*start\\s*:.*\\n`)
+    );
+    endComment = strSlice.match(
+      new RegExp(`[^\\S\\r\\n]*${comment}\\s*end\\s*:.*\\n`)
+    );
   }
   return strSlice;
 };
@@ -186,6 +190,39 @@ const readCode = (filename: string): Map<string, string> => {
   return codes;
 };
 
+const readCodeFromURL = (
+  str: string,
+  filename: string,
+  url: string,
+  html: boolean = true
+): any => {
+  const codes: Map<string, any> = new Map<string, any>();
+  codes.set("URL", url);
+  const language: string = getLanguage(filename);
+  const comment: string = getCommentType(language);
+  if (comment === "Language currently unsupported") {
+    codes.set(
+      filename,
+      "Currently unsupported language! Try again later or update the types of comments for each language in the comments.json file!"
+    );
+    return codes;
+  }
+  let keys: string[] = getKeys(str, comment);
+
+  if (html) {
+    keys.forEach((key: string) => {
+      codes.set(key, toHTML(getCodeSnippet(str, comment, key)));
+    });
+  } else {
+    keys.forEach((key: string) => {
+      codes.set(key, getCodeSnippet(str, comment, key));
+    });
+  }
+  codes.set("Keys", keys);
+
+  return mapToObject(codes);
+};
+
 /**
  * Read the code from the given file, return a REST API Compatible Object
  * @param filename filename to read from
@@ -198,11 +235,9 @@ const readCodeRest = (filename: string, html: boolean = false): any => {
   let keys: string[] = [];
   pulled.forEach((_, key) => keys.push(key));
   code.set("Keys", keys);
-  if(html){
+  if (html) {
     pulled.forEach((value, key) => code.set(key, toHTML(value)));
-
   } else {
-
     pulled.forEach((value, key) => code.set(key, value));
   }
   return mapToObject(code);
@@ -213,10 +248,9 @@ const readCodeRest = (filename: string, html: boolean = false): any => {
  * @param filename filename to read from
  * @returns Object form of Map from readCode, adds extra headers to help with parsing later
  */
-const readCodeHtmlRest = (filename: string) : any => {
+const readCodeHtmlRest = (filename: string): any => {
   return readCodeRest(filename, true);
-}
-
+};
 
 /**
  * Code testing
@@ -232,4 +266,4 @@ const test = () => {
 
 // test();
 
-export { buildComments, readCode, readCodeHtmlRest, readCodeRest };
+export { buildComments, readCode, readCodeFromURL, readCodeHtmlRest, readCodeRest };
