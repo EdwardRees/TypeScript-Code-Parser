@@ -1,6 +1,36 @@
 import fs from "fs";
 import path from "path";
 
+
+/**
+ * Convert a map into a JS object
+ * @param map map to convert
+ * @returns Object storing Map key value pairs
+ */
+const mapToObject = (map: Map<string, any>): Object => {
+  let obj: any = {};
+  map.forEach((value, key) => {
+    obj[key] = value;
+  });
+
+  return obj;
+};
+
+
+/**
+ * Convert a string to an HTML string
+ * @param str String to convert
+ * @returns linebreaks converted as <br>
+ */
+const toHTML = (str: string): string => {
+  str = str.replace(/(?:<)/g, "&lt;");
+  str = str.replace(/(?:>)/g, "&gt;");
+  str = str.replace(/(?:\r\n|\r|\n)/g, "<br>");
+  str = str.replace(/\s/g, "&nbsp;");
+  str = str.replace(/(?:\t)/g, "&nbsp;&nbsp;&nbsp;&nbsp;");
+  return str;
+};
+
 const comments = new Map<string, string>();
 
 /**
@@ -103,8 +133,12 @@ const getCodeSnippet = (str: string, comment: string, key: string): string => {
     .slice(start["index"] + start[0].length, end["index"])
     .trim();
   // ignore the start, end comments in the nested slice
-  let startComment: any = strSlice.match(new RegExp(`${comment}\\s*start\\s*:.*\\n`));
-  let endComment: any = strSlice.match(new RegExp(`${comment}\\s*end\\s*:.*\\n`));
+  let startComment: any = strSlice.match(
+    new RegExp(`${comment}\\s*start\\s*:.*\\n`)
+  );
+  let endComment: any = strSlice.match(
+    new RegExp(`${comment}\\s*end\\s*:.*\\n`)
+  );
   while (startComment !== null && endComment !== null) {
     strSlice = strSlice.replace(startComment[0], "");
     strSlice = strSlice.replace(endComment[0], "");
@@ -152,34 +186,13 @@ const readCode = (filename: string): Map<string, string> => {
   return codes;
 };
 
+
 /**
- * Read all the codes folder
- * @returns Map containing the file and an inner map containing the key, code snippet key-value pair from readCode
+ * Read the code from the given file, return a REST API Compatible Object
+ * @param filename filename to read from
+ * @returns Object form of Map from readCode, adds extra headers to help with parsing later
  */
-const readCodesFolder = (): Map<string, Map<string, string>> => {
-  const codes: Map<string, Map<string, string>> = new Map<
-    string,
-    Map<string, string>
-  >();
-  const dir: any = path.join(__dirname, "codes");
-  const files: string[] = fs.readdirSync(dir);
-  files.forEach((file: string) => {
-    file = path.join(dir, file);
-    codes.set(file, readCode(file));
-  });
-  return codes;
-};
-
-const mapToObject = (map: Map<string, any>): Object => {
-  let obj: any = {};
-  map.forEach((value, key) => {
-    obj[key] = value;
-  });
-
-  return obj;
-};
-
-const RESTreadCode = (filename: string): any => {
+const readCodeRest = (filename: string): any => {
   let code: Map<string, any> = new Map<string, any>();
   code.set("Filename", filename);
   let pulled: Map<string, string> = readCode(filename);
@@ -191,17 +204,37 @@ const RESTreadCode = (filename: string): any => {
 };
 
 /**
- * Test out the readCodesFolder function, after building the comments
+ * Read the code from the given file, return a REST API Compatible Object, with HTML Compatible elements
+ * @param filename filename to read from
+ * @returns Object form of Map from readCode, adds extra headers to help with parsing later
+ */
+const readCodeHtmlRest = (filename: string) : any => {
+  let code: Map<string, any> = new Map<string, any>();
+  code.set("Filename", filename);
+  let pulled: Map<string, string> = readCode(filename);
+  let keys: string[] = [];
+  pulled.forEach((_, key) => keys.push(key));
+  code.set("Keys", keys);
+  pulled.forEach((value, key) => code.set(key, toHTML(value)));
+  return mapToObject(code);
+}
+
+
+/**
+ * Code testing
  */
 const test = () => {
   buildComments();
   let dir = path.join(__dirname, "codes");
+  // let code = readCodeHtmlRest(dir + "/helloworld.code.c");
   dir = path.join(dir, "typescript");
   dir = path.join(dir, "structs");
-  console.log(RESTreadCode(dir + "/LinkedList.code.ts"));
-  // console.info(readCodesFolder());
+  let code = readCodeHtmlRest(dir + "/LinkedList.code.ts");
+  // console.info(code["main"]);
+  // console.info(toHTML(code["main"]));
+  console.info(code);
 };
 
 test();
 
-// export { buildComments, readCode, RESTreadCode };
+// export { buildComments, readCode, readCodeHtmlRest, readCodeRest };
