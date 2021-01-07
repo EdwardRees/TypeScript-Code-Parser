@@ -186,20 +186,25 @@ const readCode = (filename: string): Map<string, string> => {
   return codes;
 };
 
-
 /**
  * Read the code from the given file, return a REST API Compatible Object
  * @param filename filename to read from
  * @returns Object form of Map from readCode, adds extra headers to help with parsing later
  */
-const readCodeRest = (filename: string): any => {
+const readCodeRest = (filename: string, html: boolean = false): any => {
   let code: Map<string, any> = new Map<string, any>();
   code.set("Filename", filename);
   let pulled: Map<string, string> = readCode(filename);
   let keys: string[] = [];
   pulled.forEach((_, key) => keys.push(key));
   code.set("Keys", keys);
-  pulled.forEach((value, key) => code.set(key, value));
+  if(html){
+    pulled.forEach((value, key) => code.set(key, toHTML(value)));
+
+  } else {
+
+    pulled.forEach((value, key) => code.set(key, value));
+  }
   return mapToObject(code);
 };
 
@@ -209,14 +214,7 @@ const readCodeRest = (filename: string): any => {
  * @returns Object form of Map from readCode, adds extra headers to help with parsing later
  */
 const readCodeHtmlRest = (filename: string) : any => {
-  let code: Map<string, any> = new Map<string, any>();
-  code.set("Filename", filename);
-  let pulled: Map<string, string> = readCode(filename);
-  let keys: string[] = [];
-  pulled.forEach((_, key) => keys.push(key));
-  code.set("Keys", keys);
-  pulled.forEach((value, key) => code.set(key, toHTML(value)));
-  return mapToObject(code);
+  return readCodeRest(filename, true);
 }
 
 
@@ -226,12 +224,9 @@ const readCodeHtmlRest = (filename: string) : any => {
 const test = () => {
   buildComments();
   let dir = path.join(__dirname, "codes");
-  // let code = readCodeHtmlRest(dir + "/helloworld.code.c");
   dir = path.join(dir, "typescript");
   dir = path.join(dir, "structs");
   let code = readCodeHtmlRest(dir + "/LinkedList.code.ts");
-  // console.info(code["main"]);
-  // console.info(toHTML(code["main"]));
   console.info(code);
 };
 
